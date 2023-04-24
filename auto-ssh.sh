@@ -7,6 +7,9 @@ echo "-----Auto Git-----"
 echo "------------------"
 echo ""
 
+echo "Running as $(whoami)"
+echo ""
+
 eval "$(ssh-agent -s)" > /dev/null 2>&1
 
 echo "Please select a ssh key:"
