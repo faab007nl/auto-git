@@ -1,4 +1,4 @@
-# auto-git
+# ssh-key-helper
 A simple script to add your ssh-key
 
 RUN SCRIPT:
