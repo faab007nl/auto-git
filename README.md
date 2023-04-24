@@ -3,5 +3,5 @@ A simple script to add your ssh-key
 
 RUN SCRIPT:
 ```bash
-source <(wget -qO- https://raw.githubusercontent.com/faab007nl/auto-git/main/ssh-key-helper.sh)
+source <(wget -qO- https://faab007nl.github.io/ssh-key-helper/ssh-key-helper.sh)
 ```
