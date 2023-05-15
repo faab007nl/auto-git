@@ -1,5 +1,18 @@
 #!/bin/bash
 
+if ! git ls-files >& /dev/null; then
+  clear
+  
+  echo "------------------"
+  echo "-----Auto Git-----"
+  echo "------------------"
+  echo ""
+  
+  echo "The current directory is not a valid git repository!!"
+  
+  exit
+fi
+
 clear
 
 echo "------------------"
