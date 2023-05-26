@@ -10,7 +10,7 @@ if ! git ls-files >& /dev/null; then
   
   echo "The current directory is not a valid git repository!!"
   
-  exit
+  return 0
 fi
 
 clear
