@@ -78,7 +78,7 @@ read -r gitEmail
 if [ -z "$var" ]
 then
   echo "Using filename as email"
-  gitName = sshFile
+  gitName = "$sshFile"
 fi
 
 git config user.name "${gitName}"
