@@ -25,23 +25,22 @@ echo ""
 
 eval "$(ssh-agent -s)" > /dev/null 2>&1
 
-echo "Please select a ssh key:"
-
-files=$(ls ~/.ssh/)
-i=1
-
-for j in $files
-do
-
-echo "$i. $j"
-file[i]=$j
-i=$(( i + 1 ))
-
-done
-
-
 while :
 do
+    echo "Please select a ssh key:"
+    
+    files=$(ls ~/.ssh/)
+    i=1
+    
+    for j in $files
+    do
+    
+    echo "$i. $j"
+    file[i]=$j
+    i=$(( i + 1 ))
+    
+    done
+
     echo ""
     echo "Enter number"
     read -r input
