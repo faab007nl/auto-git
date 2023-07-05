@@ -97,7 +97,7 @@ read -r gitEmail
 
 if [ -z "${gitEmail-unset}" ]; then
   echo "Using filename as email"
-  gitName = "$sshFile"
+  gitName="$sshFile"
   sleep 1
 fi
 
