@@ -1,5 +1,7 @@
 #!/bin/bash
-export sshFile = "undefined"
+export sshFile=""
+export gitName=""
+export gitEmail=""
 
 if ! git ls-files >& /dev/null; then
   clear
@@ -108,9 +110,7 @@ echo "Please enter you git email: (Press enter to use filename)"
 read -r gitEmail
 
 if [ -z "${gitEmail-unset}" ]; then
-  echo "Using filename as email"
-  gitName="$sshFile"
-  sleep 1
+  gitEmail="${sshFile}"
 fi
 
 git config user.name "${gitName}"
