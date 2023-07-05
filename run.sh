@@ -75,7 +75,7 @@ echo ""
 echo "Please enter you git email: (Press enter to use filename)"
 read -r gitEmail
 
-if [ -z "$var" ]
+if [ -z "$gitName" ]
 then
   echo "Using filename as email"
   gitName = "$sshFile"
