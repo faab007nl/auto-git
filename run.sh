@@ -72,8 +72,14 @@ echo "-----Auto Git-----"
 echo "------------------"
 echo ""
 
-echo "Please enter you git email:"
+echo "Please enter you git email: (Press enter to use filename)"
 read -r gitEmail
+
+if [ -z "$var" ]
+then
+  echo "Using filename as email"
+  gitName = sshFile
+fi
 
 git config user.name "${gitName}"
 git config user.email "${gitEmail}"
