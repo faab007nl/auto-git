@@ -79,6 +79,7 @@ if [ -z "$gitName" ]
 then
   echo "Using filename as email"
   gitName = "$sshFile"
+  sleep 2
 fi
 
 git config user.name "${gitName}"
