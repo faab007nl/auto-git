@@ -1,4 +1,5 @@
 #!/bin/bash
+export sshFile = "undefined"
 
 if ! git ls-files >& /dev/null; then
   clear
