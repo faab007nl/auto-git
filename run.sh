@@ -39,13 +39,24 @@ i=$(( i + 1 ))
 
 done
 
-echo ""
-echo "Enter number"
-read -r input
 
-sshFile="${file[${input}]}"
+while :
+do
+    echo ""
+    echo "Enter number"
+    read -r input
+    
+    sshFile="${file[${input}]}"
+    
+    clear
 
-clear
+    if [ -f $sshFile ]
+    then
+        break
+    else
+        echo "Please select a valid ssh key!"
+    fi
+done
 
 echo "------------------"
 echo "-----Auto Git-----"
@@ -62,8 +73,20 @@ echo "-----Auto Git-----"
 echo "------------------"
 echo ""
 
-echo "Please enter you git name:"
-read -r gitName
+while :
+do
+    echo "Please enter you git name:"
+    read -r gitName
+    
+    clear
+
+    if [ -f $gitName ]
+    then
+        break
+    else
+        echo "Please enter a valid name!"
+    fi
+done
 
 clear
 
@@ -75,11 +98,10 @@ echo ""
 echo "Please enter you git email: (Press enter to use filename)"
 read -r gitEmail
 
-if [ -z "$gitName" ]
-then
+if [ -z "${VAR-unset}" ]; then
   echo "Using filename as email"
   gitName = "$sshFile"
-  sleep 2
+  sleep 1
 fi
 
 git config user.name "${gitName}"
