@@ -50,11 +50,10 @@ do
     
     clear
 
-    if [ -f $sshFile ]
-    then
-        break
-    else
+    if [ -z "${sshFile-unset}" ]; then
         echo "Please select a valid ssh key!"
+    else
+        break
     fi
 done
 
@@ -80,11 +79,10 @@ do
     
     clear
 
-    if [ -f $gitName ]
-    then
-        break
-    else
+    if [ -z "${gitName-unset}" ]; then
         echo "Please enter a valid name!"
+    else
+        break
     fi
 done
 
@@ -98,7 +96,7 @@ echo ""
 echo "Please enter you git email: (Press enter to use filename)"
 read -r gitEmail
 
-if [ -z "${VAR-unset}" ]; then
+if [ -z "${gitEmail-unset}" ]; then
   echo "Using filename as email"
   gitName = "$sshFile"
   sleep 1
