@@ -22,13 +22,12 @@ echo ""
 
 echo "Running as $(whoami)"
 echo ""
+echo "Please select a ssh key:"
 
 eval "$(ssh-agent -s)" > /dev/null 2>&1
 
 while :
 do
-    echo "Please select a ssh key:"
-    
     files=$(ls ~/.ssh/)
     i=1
     
@@ -50,6 +49,14 @@ do
     clear
 
     if [ -z "${sshFile-unset}" ]; then
+        echo "------------------"
+        echo "-----Auto Git-----"
+        echo "------------------"
+        echo ""
+        
+        echo "Running as $(whoami)"
+        echo ""
+        
         echo "Please select a valid ssh key!"
     else
         break
@@ -70,16 +77,20 @@ echo "------------------"
 echo "-----Auto Git-----"
 echo "------------------"
 echo ""
+echo "Please enter you git name:"
 
 while :
 do
-    echo "Please enter you git name:"
     read -r gitName
     
     clear
 
     if [ -z "${gitName-unset}" ]; then
-        echo "Please enter a valid name!"
+        echo "------------------"
+        echo "-----Auto Git-----"
+        echo "------------------"
+        echo ""
+        echo "Please enter a valid git name:"
     else
         break
     fi
