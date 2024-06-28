@@ -31,13 +31,14 @@ eval "$(ssh-agent -s)" > /dev/null 2>&1
 
 while :
 do
-    files=$(ls ~/.ssh/)
+    files=$(find ~/.ssh/ -maxdepth 1 -type f)
     i=1
     
     for j in $files
     do
     
-    echo "$i. $j"
+    tempfilename=$(basename "$j")
+    echo "$i. $tempfilename"
     file[i]=$j
     i=$(( i + 1 ))
     
@@ -66,51 +67,163 @@ do
     fi
 done
 
+chmod 400 "$sshFile"
+
+mkdir -p configs
+
+# Load the config file when file exitst
+sshFileName=$(basename "$sshFile")
+CONFIG_FILE="configs/${sshFileName}.cfg"
+if [[ -f "$CONFIG_FILE" ]]; then
+    chmod 600 "$CONFIG_FILE"
+    # Load the config file
+    source "$CONFIG_FILE"
+    CONFIG_CREATED=0
+else
+    CONFIG_CREATED=1
+    touch "${CONFIG_FILE}"
+fi
+
+clear
+
 echo "------------------"
 echo "-----Auto Git-----"
 echo "------------------"
 echo ""
 
 echo "Adding ${sshFile}"
-ssh-add ~/.ssh/"$sshFile"
+ssh-add "$sshFile"
 
 clear
 
-echo "------------------"
-echo "-----Auto Git-----"
-echo "------------------"
-echo ""
-echo "Please enter you git name:"
+if [[ $CONFIG_CREATED -eq 1 ]]; then
 
-while :
-do
-    read -r gitName
-    
+    echo "------------------"
+    echo "-----Auto Git-----"
+    echo "------------------"
+    echo ""
+    echo "Please enter you git name:"
+
+    while :
+    do
+        read -r gitName
+        
+        clear
+
+        if [ -z "${gitName-unset}" ]; then
+            echo "------------------"
+            echo "-----Auto Git-----"
+            echo "------------------"
+            echo ""
+            echo "Please enter a valid git name:"
+        else
+            break
+        fi
+    done
+
     clear
 
-    if [ -z "${gitName-unset}" ]; then
-        echo "------------------"
-        echo "-----Auto Git-----"
-        echo "------------------"
-        echo ""
-        echo "Please enter a valid git name:"
-    else
-        break
+    echo "------------------"
+    echo "-----Auto Git-----"
+    echo "------------------"
+    echo ""
+
+    echo "Please enter you git email: (Press enter to use filename)"
+    read -r gitEmail
+
+    if [ -z "${gitEmail-unset}" ]; then
+        gitEmail="${sshFileName}"
     fi
-done
 
-clear
+    if grep -q "^NAME=" "$CONFIG_FILE"; then
+        # If the key exists, update its value
+        sed -i "s/^NAME=.*/NAME=$gitName/" "$CONFIG_FILE"
+    else
+        # If the key does not exist, add the key-value pair
+        echo "NAME=$gitName" >> "$CONFIG_FILE"
+    fi
+    if grep -q "^EMAIL=" "$CONFIG_FILE"; then
+        # If the key exists, update its value
+        sed -i "s/^EMAIL=.*/EMAIL=$gitEmail/" "$CONFIG_FILE"
+    else
+        # If the key does not exist, add the key-value pair
+        echo "EMAIL=$gitEmail" >> "$CONFIG_FILE"
+    fi
 
-echo "------------------"
-echo "-----Auto Git-----"
-echo "------------------"
-echo ""
+else
+    # Ask user for confirmation
+    echo "------------------"
+    echo "-----Auto Git-----"
+    echo "------------------"
+    echo ""
+    read -p "Reconfigure git config? (y/n): " answer
 
-echo "Please enter you git email: (Press enter to use filename)"
-read -r gitEmail
+    # Process the user's response
+    case "$answer" in
+        [yY]|[yY][eE][sS])
+            clear
+            echo "------------------"
+            echo "-----Auto Git-----"
+            echo "------------------"
+            echo ""
+            echo "Please enter you git name:"
 
-if [ -z "${gitEmail-unset}" ]; then
-  gitEmail="${sshFile}"
+            while :
+            do
+                read -r gitName
+                
+                clear
+
+                if [ -z "${gitName-unset}" ]; then
+                    echo "------------------"
+                    echo "-----Auto Git-----"
+                    echo "------------------"
+                    echo ""
+                    echo "Please enter a valid git name:"
+                else
+                    break
+                fi
+            done
+
+            clear
+
+            echo "------------------"
+            echo "-----Auto Git-----"
+            echo "------------------"
+            echo ""
+
+            echo "Please enter you git email: (Press enter to use filename)"
+            read -r gitEmail
+
+            if [ -z "${gitEmail-unset}" ]; then
+                gitEmail="${sshFileName}"
+            fi
+
+            if grep -q "^NAME=" "$CONFIG_FILE"; then
+                # If the key exists, update its value
+                sed -i "s/^NAME=.*/NAME=$gitName/" "$CONFIG_FILE"
+            else
+                # If the key does not exist, add the key-value pair
+                echo "NAME=$gitName" >> "$CONFIG_FILE"
+            fi
+            if grep -q "^EMAIL=" "$CONFIG_FILE"; then
+                # If the key exists, update its value
+                sed -i "s/^EMAIL=.*/EMAIL=$gitEmail/" "$CONFIG_FILE"
+            else
+                # If the key does not exist, add the key-value pair
+                echo "EMAIL=$gitEmail" >> "$CONFIG_FILE"
+            fi
+            ;;
+        [nN]|[nN][oO])
+            clear
+            ;;
+        *)
+            clear
+            ;;
+    esac
+
+    gitName="${NAME}"
+    gitEmail="${EMAIL}"
 fi
 
 git config user.name "${gitName}"
@@ -123,7 +236,11 @@ echo "-----Auto Git-----"
 echo "------------------"
 echo ""
 
-echo "Git configured:"
+if [[ $CONFIG_CREATED -eq 1 ]]; then
+    echo "Git configured:"
+else
+    echo "Git configured from cfg:"
+fi
 echo "file: ${sshFile}"
 echo "name: ${gitName}"
 echo "email: ${gitEmail}"
