@@ -1,4 +1,7 @@
 #!/bin/bash
+EMAIL_ARG=$1
+AUTOLOAD_ARG=$2
+SSH_FOLDER="$HOME/.ssh"
 export sshFile=""
 export gitName=""
 export gitEmail=""
@@ -23,36 +26,65 @@ echo "-----Auto Git-----"
 echo "------------------"
 echo ""
 
-echo "Running as $(whoami)"
-echo ""
-echo "Please select a ssh key:"
+if [ -z "$EMAIL_ARG" ]; then
+    echo "Running as $(whoami)"
+    echo ""
+    echo "Please select a ssh key:"
 
-eval "$(ssh-agent -s)" > /dev/null 2>&1
+    eval "$(ssh-agent -s)" > /dev/null 2>&1
 
-while :
-do
+    while :
+    do
+        files=$(find ~/.ssh/ -maxdepth 1 -type f)
+        i=1
+        
+        for j in $files
+        do
+            tempfilename=$(basename "$j")
+            echo "$i. $tempfilename"
+            file[i]=$j
+            i=$(( i + 1 ))
+        done
+
+        echo ""
+        echo "Enter number"
+        read -r input
+        
+        sshFile="${file[${input}]}"
+        
+        clear
+
+        if [ -z "${sshFile-unset}" ]; then
+            echo "------------------"
+            echo "-----Auto Git-----"
+            echo "------------------"
+            echo ""
+            
+            echo "Running as $(whoami)"
+            echo ""
+            
+            echo "Please select a valid ssh key!"
+        else
+            break
+        fi
+    done
+else
     files=$(find ~/.ssh/ -maxdepth 1 -type f)
     i=1
     
     for j in $files
     do
-    
-    tempfilename=$(basename "$j")
-    echo "$i. $tempfilename"
-    file[i]=$j
-    i=$(( i + 1 ))
-    
+        tempfilename=$(basename "$j")
+
+        if [ "$EMAIL_ARG" == "$tempfilename" ]; then
+            sshFile="$j"
+            break
+        fi
+        i=$(( i + 1 ))
     done
 
-    echo ""
-    echo "Enter number"
-    read -r input
-    
-    sshFile="${file[${input}]}"
-    
     clear
-
-    if [ -z "${sshFile-unset}" ]; then
+    if [ -z "$sshFile" ]; then
         echo "------------------"
         echo "-----Auto Git-----"
         echo "------------------"
@@ -60,27 +92,30 @@ do
         
         echo "Running as $(whoami)"
         echo ""
-        
-        echo "Please select a valid ssh key!"
-    else
-        break
+        echo "Ssh key not found. exiting."
+        exit
     fi
-done
+fi
 
 chmod 400 "$sshFile"
 
-mkdir -p configs
+mkdir -p $SSH_FOLDER/configs
 
 # Load the config file when file exitst
 sshFileName=$(basename "$sshFile")
-CONFIG_FILE="configs/${sshFileName}.cfg"
+CONFIG_FILE="$SSH_FOLDER/configs/${sshFileName}.gitcfg"
 if [[ -f "$CONFIG_FILE" ]]; then
     chmod 600 "$CONFIG_FILE"
     # Load the config file
     source "$CONFIG_FILE"
-    CONFIG_CREATED=0
+
+    if grep -q "^NAME=" "$CONFIG_FILE"; then
+        CONFIG_FILE_VALID=1
+    else
+        CONFIG_FILE_VALID=0
+    fi
 else
-    CONFIG_CREATED=1
+    CONFIG_FILE_VALID=0
     touch "${CONFIG_FILE}"
 fi
 
@@ -96,7 +131,7 @@ ssh-add "$sshFile"
 
 clear
 
-if [[ $CONFIG_CREATED -eq 1 ]]; then
+if [[ $CONFIG_FILE_VALID -eq 0 ]]; then
 
     echo "------------------"
     echo "-----Auto Git-----"
@@ -149,17 +184,21 @@ if [[ $CONFIG_CREATED -eq 1 ]]; then
         # If the key does not exist, add the key-value pair
         echo "EMAIL=$gitEmail" >> "$CONFIG_FILE"
     fi
-
 else
-    # Ask user for confirmation
-    echo "------------------"
-    echo "-----Auto Git-----"
-    echo "------------------"
-    echo ""
-    read -p "Reconfigure git config? (y/n): " answer
+    # if AUTOLOAD_ARG is present set the awnser to n
+    if [ -z "$AUTOLOAD_ARG" ]; then
+        # Ask user for confirmation
+        echo "------------------"
+        echo "-----Auto Git-----"
+        echo "------------------"
+        echo ""
+        read -p "Reconfigure git config? (y/n, default: n): " awnser
+    else
+        awnser="$AUTOLOAD_ARG"
+    fi
 
     # Process the user's response
-    case "$answer" in
+    case "$awnser" in
         [yY]|[yY][eE][sS])
             clear
             echo "------------------"
@@ -239,7 +278,7 @@ echo ""
 if [[ $CONFIG_CREATED -eq 1 ]]; then
     echo "Git configured:"
 else
-    echo "Git configured from cfg:"
+    echo "Git configured from config:"
 fi
 echo "file: ${sshFile}"
 echo "name: ${gitName}"
